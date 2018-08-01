@@ -1,5 +1,5 @@
 /*
- *  Overlay.frag, based on Multiply.frag in Hexels 3
+ *  HardLight.frag, based on Multiply.frag in Hexels 3
  *  Hexels 2
  *
  * (c) 2018 - Marmoset, Slono
@@ -14,12 +14,10 @@ void main()
         vec4 otex = texture2D(_LowerLayer, gl_TexCoord[0].xy);
         vec4 incoming = texture2D(_UpperLayer, gl_TexCoord[0].xy);
 
+        vec3 lighter = (1.0 - (1.0 - otex.rgb) * (1.0 - 2.0 * (incoming.rgb - 0.5)));
+        vec3 darker = otex.rgb * 2.0 * incoming.rgb;
 
-        //multiply RGB.
-
-        vec3 malted = mix(1.0 - 2.0 * (1.0 - otex.rgb) * (1.0 - incoming.rgb),
-                          2.0 * otex.rgb * incoming.rgb,
-                          step(otex.rgb, vec3(0.5)));
+        vec3 malted = mix(lighter, darker, step(incoming.rgb, vec3(0.5)));
 
         incoming.a *= _LayerOpacity;
         vec4 disrespectedAlpha = vec4(mix(otex.rgb, malted, incoming.a), otex.a + (1.0-otex.a) * incoming.a);
@@ -29,5 +27,4 @@ void main()
         vec4 respectedAlpha = vec4(mix(otex.rgb, malted, incoming.a), otex.a);
 
         gl_FragColor = mix(disrespectedAlpha, respectedAlpha, float(Preserve_Alpha));
-
 }
